@@ -15,8 +15,7 @@ class SettingsView: UIViewController {
     private var settings: [Settings] = [
         Settings(image: UIImage(named: "languageIcon"), title: "Language", description: "English", type: .withRightButton),
         Settings(image: UIImage(named: "moon"), title: "Dark Mode", description: "", type: .withSwitch),
-        Settings(image: UIImage(named: "trash"), title: "Clear Data", description: "", type: .usual)
-    ]
+        Settings(image: UIImage(named: "trash"), title: "Clear Data", description: "", type: .usual)]
     
     private lazy var tableView: UITableView = {
         let view = UITableView()
@@ -31,18 +30,32 @@ class SettingsView: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         controller = SettingsController(settingsView: self)
-        view.backgroundColor = .white
-        setupNavigationItem()
+        view.backgroundColor = .systemBackground
         setupConstraints()
     }
     
-    private func setupNavigationItem() {
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        let isDarkTheme = UserDefaults.standard.bool(forKey: "isDarkTheme")
+        if isDarkTheme == true {
+            view.overrideUserInterfaceStyle = .dark
+        } else {
+            view.overrideUserInterfaceStyle = .light
+        }
+        setupNavigationItem(isDarkTheme: isDarkTheme)
+    }
+    
+    private func setupNavigationItem(isDarkTheme: Bool) {
         navigationItem.title = "Settings"
         let settingsBarButtonItem = UIBarButtonItem(image: UIImage(named: "settingIcon"), style: .plain, target: self, action: #selector(settingButtonTapped))
-        settingsBarButtonItem.tintColor = .black
         navigationItem.rightBarButtonItem = settingsBarButtonItem
-        let labelText = UIBarButtonItem(title: "Label", style: .plain, target: self, action: #selector(labelButtonTapped))
-        navigationItem.leftBarButtonItem = labelText
+        if isDarkTheme == true {
+            navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
+            navigationItem.rightBarButtonItem?.tintColor = .white
+        } else {
+            navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
+            navigationItem.rightBarButtonItem?.tintColor = .black
+        }
     }
     
     private func setupConstraints() {
@@ -58,9 +71,6 @@ class SettingsView: UIViewController {
     @objc func settingButtonTapped() {
         
     }
-    @objc func labelButtonTapped() {
-        
-    }
 }
 
 extension SettingsView: SettingsViewProtocol {
@@ -73,6 +83,7 @@ extension SettingsView: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: SettingsCell.reuseId, for: indexPath) as! SettingsCell
+        cell.delegate = self
         cell.setup(settings: settings[indexPath.row])
         return cell
     }
@@ -81,6 +92,17 @@ extension SettingsView: UITableViewDataSource {
 extension SettingsView: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 51
+    }
+}
+
+extension SettingsView: SettingsCellDelegate {
+    func didSwitchOn(isOn: Bool) {
+        UserDefaults.standard.setValue(isOn, forKey: "isDarkTheme")
+        if isOn == true {
+            view.overrideUserInterfaceStyle = .dark
+        } else {
+            view.overrideUserInterfaceStyle = .light
+        }
     }
 }
 

@@ -19,14 +19,14 @@ struct Settings {
     var type: SettingsType
 }
 
+protocol SettingsCellDelegate: AnyObject {
+    func didSwitchOn(isOn: Bool)
+}
+
 class SettingsCell: UITableViewCell {
     static var reuseId = "settings_cell"
     
-    private lazy var bgView: UIView = {
-       let view = UIView()
-        view.backgroundColor = .tertiaryLabel
-        return view
-    }()
+    weak var delegate: SettingsCellDelegate?
     
     private lazy var settingImage: UIImageView = {
         let view = UIImageView()
@@ -45,6 +45,9 @@ class SettingsCell: UITableViewCell {
     
     private lazy var switchView: UISwitch = {
         let view = UISwitch()
+        let isOn = UserDefaults.standard.bool(forKey: "isDarkTheme")
+        view.isOn = isOn
+        view.addTarget(self, action: #selector(didSwitchOn), for: .valueChanged)
         return view
     }()
     
@@ -55,13 +58,15 @@ class SettingsCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+    @objc func didSwitchOn() {
+        delegate?.didSwitchOn(isOn: switchView.isOn)
+    }
     func setup(settings: Settings) {
         settingImage.image = settings.image
         settingLabel.text = settings.title
         if settings.type == .withRightButton {
             rightButton.setTitle(settings.description, for: .normal)
-            rightButton.setImage(UIImage(named: "Chevron"), for: .normal)
+            rightButton.setImage(UIImage(systemName: "chevron.right"), for: .normal)
             rightButton.semanticContentAttribute = .forceRightToLeft
             switchView.isHidden = true
         } else if settings.type == .withSwitch {
@@ -72,13 +77,6 @@ class SettingsCell: UITableViewCell {
         }
     }
     private func setupConstraints() {
-        contentView.addSubview(bgView)
-        bgView.translatesAutoresizingMaskIntoConstraints = false
-        bgView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
-        bgView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
-        bgView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
-        bgView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
-        
         contentView.addSubview(settingImage)
         settingImage.translatesAutoresizingMaskIntoConstraints = false
         settingImage.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true

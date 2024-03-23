@@ -18,10 +18,24 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
-//        let homeView = HomeView()
-        let onBoardingView = OnBoardingView()
-        let navigationController = UINavigationController(rootViewController: onBoardingView)
+        
+        var initialView: UIViewController?
+        if UserDefaults.standard.bool(forKey: "OnBoardingShown") == true {
+            initialView = HomeView()
+        } else {
+            initialView = OnBoardingView()
+        }
+        
+        let navigationController = UINavigationController(rootViewController: initialView!)
         window.rootViewController = navigationController
+        
+        let isDarkTheme = UserDefaults.standard.bool(forKey: "isDarkTheme")
+        if isDarkTheme == true {
+            window.overrideUserInterfaceStyle = .dark
+        } else {
+            window.overrideUserInterfaceStyle = .light
+        }
+        
         window.makeKeyAndVisible()
         self.window = window
     }

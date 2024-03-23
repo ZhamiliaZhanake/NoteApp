@@ -7,11 +7,11 @@
 
 import UIKit
 protocol HomeViewProtocol {
-    func successNotes(notes: [String])
+    func successNotes(notes: [Notes])
 }
 class HomeView: UIViewController {
-    private var notes: [String] = []
     private var controller: HomeControllerProtocol?
+    private var notes: [Notes] = []
     
     private lazy var noteSearchBar: UISearchBar = {
         let view = UISearchBar()
@@ -28,7 +28,7 @@ class HomeView: UIViewController {
     }()
     
     private lazy var notesCollectionView: UICollectionView = {
-      let layout = UICollectionViewFlowLayout()
+        let layout = UICollectionViewFlowLayout()
         layout.minimumLineSpacing = 12
         layout.minimumInteritemSpacing = 12
         let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -46,27 +46,49 @@ class HomeView: UIViewController {
         view.setTitleColor(.white, for: .normal)
         view.titleLabel?.font = UIFont.systemFont(ofSize: 25)
         view.layer.cornerRadius = 42 / 2
+        view.addTarget(self, action: #selector(addButtonTapped), for: .touchUpInside)
         return view
     }()
     
     override func viewDidLoad() {
         controller = HomeController(view: self)
         super.viewDidLoad()
-        view.backgroundColor = .white
-        setupNavigationItem()
+        view.backgroundColor = .systemBackground
         setupConstraints()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationItem.hidesBackButton = true
+        let isDarkTheme = UserDefaults.standard.bool(forKey: "isDarkTheme")
+        if isDarkTheme == true {
+            view.overrideUserInterfaceStyle = .dark
+        } else {
+            view.overrideUserInterfaceStyle = .light
+        }
+        setupNavigationItem(isDarkTheme: isDarkTheme)
         controller?.onGetNotes()
     }
     
-    private func setupNavigationItem() {
+    private func setupNavigationItem(isDarkTheme: Bool) {
         navigationItem.title = "Main"
         let settingsBarButtonItem = UIBarButtonItem(image: UIImage(named: "settingIcon"), style: .plain, target: self, action: #selector(settingButtonTapped))
-        settingsBarButtonItem.tintColor = .black
         navigationItem.rightBarButtonItem = settingsBarButtonItem
+        if isDarkTheme == true {
+            navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
+            navigationItem.rightBarButtonItem?.tintColor = .white
+        } else {
+            navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
+            navigationItem.rightBarButtonItem?.tintColor = .black
+        }
     }
     
     @objc func settingButtonTapped() {
         let vc = SettingsView()
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    @objc func addButtonTapped() {
+        let vc = AddNoteView()
         navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -105,7 +127,7 @@ extension HomeView: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: NoteCell.reuseId, for: indexPath) as! NoteCell
-        cell.setup(title: notes[indexPath.row])
+        cell.setup(title: notes[indexPath.row].title ?? "")
         return cell
     }
 }
@@ -117,7 +139,7 @@ extension HomeView: UICollectionViewDelegateFlowLayout {
 }
 
 extension HomeView: HomeViewProtocol {
-    func successNotes(notes: [String]) {
+    func successNotes(notes: [Notes]) {
         self.notes = notes
         notesCollectionView.reloadData()
     }

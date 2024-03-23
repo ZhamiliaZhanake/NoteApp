@@ -14,12 +14,7 @@ struct Screens {
 
 class OnBoardingCell: UICollectionViewCell {
     static var reuseId = "cv_cell"
-    
-    private lazy var containerView: UIView = {
-       let view = UIView()
-        return view
-    }()
-    
+   
     private lazy var screenImage: UIImageView = {
        let view = UIImageView()
         return view
@@ -47,30 +42,23 @@ class OnBoardingCell: UICollectionViewCell {
     }
     
     private func configureCell() {
-        contentView.addSubview(containerView)
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-        containerView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
-        containerView.leftAnchor.constraint(equalTo: contentView.leftAnchor).isActive = true
-        containerView.rightAnchor.constraint(equalTo: contentView.rightAnchor).isActive = true
-        containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
-        
-        containerView.addSubview(screenImage)
+        addSubview(screenImage)
         screenImage.translatesAutoresizingMaskIntoConstraints = false
-        screenImage.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 100).isActive = true
-        screenImage.centerXAnchor.constraint(equalTo: containerView.centerXAnchor).isActive = true
+        screenImage.topAnchor.constraint(equalTo: topAnchor, constant: 100).isActive = true
+        screenImage.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
         screenImage.heightAnchor.constraint(equalToConstant: 140).isActive = true
         screenImage.widthAnchor.constraint(equalToConstant: 211).isActive = true
         
-        containerView.addSubview(screenTitle)
+        addSubview(screenTitle)
         screenTitle.translatesAutoresizingMaskIntoConstraints = false
         screenTitle.topAnchor.constraint(equalTo: screenImage.bottomAnchor, constant: 30).isActive = true
-        screenTitle.centerXAnchor.constraint(equalTo: containerView.centerXAnchor).isActive = true
+        screenTitle.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
         
-        containerView.addSubview(screenDescription)
+        addSubview(screenDescription)
         screenDescription.translatesAutoresizingMaskIntoConstraints = false
         screenDescription.topAnchor.constraint(equalTo: screenTitle.bottomAnchor, constant: 20).isActive = true
-        screenDescription.leftAnchor.constraint(equalTo: containerView.leftAnchor, constant: 10).isActive = true
-        screenDescription.rightAnchor.constraint(equalTo: containerView.rightAnchor, constant: 10).isActive = true
+        screenDescription.leftAnchor.constraint(equalTo: leftAnchor, constant: 20).isActive = true
+        screenDescription.rightAnchor.constraint(equalTo: rightAnchor, constant: -20).isActive = true
     }
     
     func setData(screen: Screens) {
